@@ -1,0 +1,1 @@
+docker compose -f docker-compose-observability.yaml up -d
