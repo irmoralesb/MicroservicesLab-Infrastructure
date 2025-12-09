@@ -6,18 +6,22 @@ scrape_configs:
   - job_name: 'otel-collector'
     static_configs:
       - targets: ['otel-collector:8888']
+    metrics_path: '/metrics'
 
   # Loki metrics
   - job_name: 'loki'
     static_configs:
       - targets: ['loki:3100']
+    metrics_path: '/metrics'
 
   # Tempo metrics
   - job_name: 'tempo'
     static_configs:
       - targets: ['tempo:3200']
+    metrics_path: '/metrics'
 
   # Grafana metrics
   - job_name: 'grafana'
     static_configs:
       - targets: ['grafana:3000']
+    metrics_path: '/metrics'
