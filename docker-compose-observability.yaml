@@ -1,0 +1,127 @@
+version: "3.9"
+
+networks:
+  observability:
+    driver: bridge
+
+volumes:
+  grafana_data:
+  loki_data:
+  tempo_data:
+
+services:
+
+  # -----------------------------
+  # OpenTelemetry Collector
+  # -----------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    networks:
+      - observability
+
+  # -----------------------------
+  # Loki (Logs Backend)
+  # -----------------------------
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./loki-config.yml:/etc/loki/loki-config.yml
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - observability
+
+  # -----------------------------
+  # Tempo (Tracing Backend)
+  # -----------------------------
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: ["-config.file=/etc/tempo/tempo-config.yml"]
+    volumes:
+      - ./tempo-config.yml:/etc/tempo/tempo-config.yml
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"   # Tempo HTTP
+    networks:
+      - observability
+
+  # -----------------------------
+  # Grafana (UI)
+  # -----------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+
+    # Environment-variable based configuration (no manual UI setup needed)
+    environment:
+      # ---- Admin & Security ----
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+      # ---- Server ----
+      - GF_SERVER_HTTP_PORT=3000
+
+      # ---- Anonymous Access (optional for local lab) ----
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+
+      # ---- Disable login form if using only anonymous ----
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+
+      # ---- Feature toggles (optional) ----
+      - GF_FEATURE_TOGGLES_ENABLE=tempoSearch tempoBackendSearch
+
+    # CLI-style overrides are also supported via command
+    command:
+      - --config=/etc/grafana/grafana.ini
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - loki
+      - tempo
+
+    networks:
+      - observability
+
+  # -----------------------------
+  # Example .NET Microservice
+  # -----------------------------
+  dotnet-service:
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    container_name: dotnet-service
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector
+    networks:
+      - observability
+
+  # -----------------------------
+  # Example Python Microservice
+  # -----------------------------
+  python-service:
+    image: python:3.12-slim
+    container_name: python-service
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector
+    networks:
+      - observability
