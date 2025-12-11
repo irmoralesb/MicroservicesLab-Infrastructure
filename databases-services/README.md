@@ -204,7 +204,17 @@ docker-compose -f docker-container.yaml up -d
 
 #### Method 2: .env File
 
-Create a `.env` file in the `databases-services` directory:
+Docker Compose **automatically** looks for a `.env` file in the **current working directory** where you run the command.
+
+**Important:** When using `-f docker-container.yaml`, Docker Compose looks for `.env` in the directory where you execute the command, not necessarily where the compose file is located.
+
+**Recommended approach:** Create a `.env` file in the `databases-services` directory and run the command from that same directory:
+
+```bash
+cd databases-services
+```
+
+Create the `.env` file (you can copy from `.env_template` and customize):
 
 ```env
 # SQL Server
@@ -230,6 +240,11 @@ TZ=UTC
 Then run:
 ```bash
 docker-compose -f docker-container.yaml up -d
+```
+
+**Note:** If you run the command from a different directory, make sure the `.env` file exists in that directory, or use the `--env-file` flag to specify a custom path:
+```bash
+docker-compose -f docker-container.yaml --env-file databases-services/.env up -d
 ```
 
 #### Method 3: Inline with docker-compose
