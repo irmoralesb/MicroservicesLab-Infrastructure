@@ -31,3 +31,9 @@ scrape_configs:
     static_configs:
       - targets: ['grafana:3000']
     metrics_path: '/metrics'
+
+  # Node Exporter for Ubuntu server
+  - job_name: "node_exporter"
+    static_configs:
+      - targets:
+          - "localhost:9100"
