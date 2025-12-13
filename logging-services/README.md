@@ -31,7 +31,11 @@ This project provides a comprehensive observability stack for microservices, inc
   - Loki (port 3100)
   - Tempo (port 3200)
   - Grafana (port 3000)
+  - Node Exporter (external server on port 9100)
 - **Storage:** Data persisted in Docker volume `prometheus_data`
+- **Useful URLs:**
+  - **Web UI:** `http://<ip-address>:9090`
+  - **Targets Page:** `http://<ip-address>:9090/targets` (view all scrape targets and their status)
 
 ### Tempo
 
@@ -44,6 +48,16 @@ This project provides a comprehensive observability stack for microservices, inc
   - gRPC endpoint: `0.0.0.0:4317`
   - HTTP endpoint: `0.0.0.0:4318`
 - **Storage:** Local filesystem backend with data persisted in Docker volume `tempo_data`
+
+## Node Exporter
+
+**Goal:** Node Exporter is a Prometheus exporter for hardware and OS metrics exposed on Unix systems. It provides detailed system metrics including CPU, memory, disk, network, and other hardware statistics.
+
+**Technical Details:**
+- **Port:** `9100` (HTTP metrics endpoint)
+- **Metrics Endpoint:** `http://<ip-address>:9100/metrics`
+- **Configuration:** Configured in `prometheus.yml` to scrape metrics from the server where Node Exporter is running
+- **Note:** Node Exporter should be installed and running on the server you want to monitor. It is not part of the Docker Compose stack but is configured as an external scrape target in Prometheus.
 
 ## OpenTelemetry Collector Configuration
 
@@ -100,6 +114,7 @@ The observability stack follows a unified data flow pattern:
      - OpenTelemetry Collector's internal metrics (port `8888`)
      - OpenTelemetry Collector's OTLP metrics endpoint (port `8889`)
      - Loki, Tempo, and Grafana's native metrics endpoints
+     - Node Exporter (external server metrics on port 9100)
 
 4. **Data Visualization:**
    - Grafana connects to all three backends:
