@@ -33,6 +33,6 @@ scrape_configs:
     metrics_path: '/metrics'
 
   # Node Exporter for Ubuntu server
-  - job_name: "node_exporter"
+  - job_name: "node"
     static_configs:
       - targets: ['192.168.1.250:9100']
