@@ -1,0 +1,25 @@
+version: '3.8'
+
+# Main Docker Compose file that references individual service files
+# This file serves as the entry point for the entire infrastructure
+#
+# Usage:
+#   Docker Compose v2.20+: docker compose up
+#   Docker Compose v1/v2: docker-compose -f docker-container.yaml -f mssql-server.yaml -f postgres.yaml -f redis.yaml -f mongodb.yaml up
+#
+# Alternative: Use docker-compose with multiple -f flags:
+#   docker-compose -f docker-container.yaml -f mssql-server.yaml -f postgres.yaml -f redis.yaml -f mongodb.yaml up
+
+# Include individual service files
+# Note: This requires Docker Compose v2.20+ with include support
+# For older versions, use multiple -f flags as shown above
+
+include:
+  - path: mssql-server.yaml
+  - path: postgres.yaml
+  - path: redis.yaml
+  - path: mongodb.yaml
+
+# Shared volumes and networks are defined in individual service files
+# All services, volumes, and networks from included files will be merged
+

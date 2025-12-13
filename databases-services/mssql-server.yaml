@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  mssql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql-server-2022
+    hostname: mssql-server
+    restart: unless-stopped
+    
+    environment:
+      # Accept the End User License Agreement (required)
+      - ACCEPT_EULA=Y
+      
+      # SQL Server System Administrator (SA) password
+      # This is the default username for SQL Server
+      - SA_PASSWORD=${SA_PASSWORD:-YourStrong@Password123}
+      
+      # SQL Server Product ID (optional)
+      # Options: Developer (free, full features), Express (free, limited), Standard, Enterprise, EnterpriseCore
+      - MSSQL_PID=${MSSQL_PID:-Developer}
+      
+      # Enable SQL Server Agent (optional, for scheduled jobs)
+      - MSSQL_AGENT_ENABLED=${MSSQL_AGENT_ENABLED:-true}
+      
+      # Timezone (optional)
+      - TZ=${TZ:-UTC}
+    
+    ports:
+      # Map container port 1433 to host port 1433
+      # Format: "host_port:container_port"
+      - "${MSSQL_PORT:-1433}:1433"
+    
+    volumes:
+      # Persist database data
+      - mssql_data:/var/opt/mssql
+      # Optional: Mount custom SQL scripts to initialize database
+      # - ./init-scripts:/docker-entrypoint-initdb.d
+    
+    networks:
+      - mssql-network
+    
+    # Resource limits (optional but recommended)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    # Health check to ensure container is ready
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD:-YourStrong@Password123} -Q "SELECT 1" || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  mssql_data:
+    driver: local
+    name: mssql_data
+
+networks:
+  mssql-network:
+    driver: bridge
+    name: mssql-network
+

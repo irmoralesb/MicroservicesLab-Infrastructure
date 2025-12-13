@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb-server
+    hostname: mongodb-server
+    restart: unless-stopped
+    platform: linux/amd64
+    
+    environment:
+      # MongoDB root username
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-admin}
+      
+      # MongoDB root password
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-admin}
+      
+      # Default database name (optional)
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE:-admin}
+      
+      # Timezone (optional)
+      - TZ=${TZ:-UTC}
+    
+    ports:
+      # Map container port 27017 to host port 27017
+      # Format: "host_port:container_port"
+      - "${MONGODB_PORT:-27017}:27017"
+    
+    volumes:
+      # Persist database data
+      - mongodb_data:/data/db
+      # Optional: Mount custom MongoDB initialization scripts
+      # - ./mongodb-init-scripts:/docker-entrypoint-initdb.d
+      # Optional: Mount custom MongoDB configuration file
+      # - ./mongod.conf:/etc/mongod.conf
+    
+    networks:
+      - mongodb-network
+    
+    # Resource limits (optional but recommended)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    # Health check to ensure container is ready
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' --quiet || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mongodb_data:
+    driver: local
+    name: mongodb_data
+
+networks:
+  mongodb-network:
+    driver: bridge
+    name: mongodb-network
