@@ -1,2 +1,2 @@
 include:
-  path: identity-service.yaml
+  - path: identity-service.yaml
