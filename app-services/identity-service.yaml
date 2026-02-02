@@ -1,0 +1,9 @@
+services:
+  identity-service:
+    build:
+      context: ../MicroservicesLab-IdentityService
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - ../env_files/.env_identity_svc
