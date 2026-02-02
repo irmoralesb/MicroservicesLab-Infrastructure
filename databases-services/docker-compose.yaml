@@ -16,9 +16,6 @@ version: '3.8'
 
 include:
   - path: mssql-server.yaml
-  - path: postgres.yaml
-  - path: redis.yaml
-  - path: mongodb.yaml
 
 # Shared volumes and networks are defined in individual service files
 # All services, volumes, and networks from included files will be merged
