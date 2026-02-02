@@ -36,3 +36,13 @@ scrape_configs:
   - job_name: "node"
     static_configs:
       - targets: ['192.168.1.250:9100']
+
+  # Prometheus metrics for Ubuntu Client
+  - job_name: 'kubuntu-translator-prometheus'
+    static_configs:
+      - targets: ['192.168.1.9:8000']
+
+  # Prometheus metrics for Identity service
+  - job_name: 'identity-service-prometheus'
+    static_configs:
+      - targets: ['192.168.1.46:8001']
