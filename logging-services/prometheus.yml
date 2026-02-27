@@ -46,3 +46,8 @@ scrape_configs:
   - job_name: 'identity-service-prometheus'
     static_configs:
       - targets: ['192.168.1.46:8001']
+
+  - job_name: 'translator_service'
+    static_configs:
+      - targets: ['host.docker.internal:8000']  # Replace 8000 with your FastAPI port
+    metrics_path: '/api/v1/metrics'
